@@ -1,0 +1,32 @@
+name: Generate a build and push to another branch
+
+on:
+  push:
+    branches:
+      - main # Rama que dispara el workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Push
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v3
+
+      - name: Install all dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build # Comando de build del proyecto
+
+      - name: Create branch if it doesn't exist
+        run: git checkout -b build
+
+      - name: Push
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: build # Rama donde se publican los archivos
+          FOLDER: dist # Carpeta que genera el build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Lo agrega GitHub solo
+          MESSAGE: "Build: ({sha}) {msg}" # Mensaje del commit
